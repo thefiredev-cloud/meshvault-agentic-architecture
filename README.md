@@ -11,7 +11,7 @@ A useful agent system needs more than a large model. It needs several kinds of j
 MeshVault combines two orchestration layers:
 
 1. **Mixture of Agents (MoA)** gives the acting agent diverse model advice before it decides what to do.
-2. **Role orchestration** lets Chief delegate bounded work to five employee specialists and return one verified answer to the owner.
+2. **Role orchestration** lets Mesh delegate bounded work to five employee specialists and return one verified answer to the owner.
 
 The layers complement each other. MoA improves reasoning. Role orchestration improves ownership, scope, and operational accountability.
 
@@ -21,7 +21,7 @@ The layers complement each other. MoA improves reasoning. Role orchestration imp
 flowchart TB
     Owner["Owner"]
     Channels["Owner interfaces\nmessaging gateway · planned iOS messenger · planned macOS browser"]
-    Chief["Chief\nowner-facing coordinator"]
+    Mesh["Mesh\nowner-facing coordinator"]
 
     subgraph Reasoning["Reasoning plane"]
         MoA["Hermes MoA"]
@@ -50,20 +50,20 @@ flowchart TB
         Gate{"Approval gate"}
     end
 
-    Owner --> Channels --> Chief
-    Chief <--> Agg
-    Chief <--> Alex
-    Chief <--> Casey
-    Chief <--> Jordan
-    Chief <--> Morgan
-    Chief <--> Riley
+    Owner --> Channels --> Mesh
+    Mesh <--> Agg
+    Mesh <--> Alex
+    Mesh <--> Casey
+    Mesh <--> Jordan
+    Mesh <--> Morgan
+    Mesh <--> Riley
 
-    Chief <--> Vault
+    Mesh <--> Vault
     Vault <--> Graphify
-    Chief <--> Models
-    Chief --> Tools --> Gate
+    Mesh <--> Models
+    Mesh --> Tools --> Gate
     Gate -->|approved| Audit
-    Gate -->|not approved| Chief
+    Gate -->|not approved| Mesh
 ```
 
 ## Hermes MoA loop
@@ -129,11 +129,11 @@ sequenceDiagram
 
 ## Role orchestration
 
-Chief is the sole owner-facing coordinator. The five employee agents are bounded workers, not independent public personas and not competing orchestrators.
+Mesh is the sole owner-facing coordinator. The five employee agents are bounded workers, not independent public personas and not competing orchestrators.
 
 ```mermaid
 flowchart LR
-    Request["Owner request"] --> Classify{"Chief classifies scope"}
+    Request["Owner request"] --> Classify{"Mesh classifies scope"}
 
     Classify -->|sales or outreach| Alex["Alex"]
     Classify -->|operations, research, finance| Casey["Casey"]
@@ -148,7 +148,7 @@ flowchart LR
     Fanout --> Morgan
     Fanout --> Riley
 
-    Alex --> Verify["Chief verifies evidence"]
+    Alex --> Verify["Mesh verifies evidence"]
     Casey --> Verify
     Jordan --> Verify
     Morgan --> Verify
@@ -167,14 +167,14 @@ flowchart LR
 
 | Role | Primary scope | Default boundary |
 |---|---|---|
-| Chief | Coordination, verification, owner communication | One accountable final answer |
+| Mesh | Coordination, verification, owner communication | One accountable final answer |
 | Alex | Sales and outreach | Draft or stage outbound work unless approved |
 | Casey | Operations, research, finance | Evidence-first; money movement remains gated |
 | Jordan | Client success | Customer context with outbound actions gated |
 | Morgan | Marketing and content | Draft freely; publishing remains gated |
 | Riley | Engineering | Build and verify; deployments and destructive changes remain gated |
 
-Employee responses are treated as untrusted input until Chief verifies them against live state or primary sources.
+Employee responses are treated as untrusted input until Mesh verifies them against live state or primary sources.
 
 ## Context and memory
 
@@ -186,7 +186,7 @@ flowchart LR
     Query["New owner request"] --> Recall["Graph-first recall"]
     Graph --> Recall
     Recall --> Context["Bounded relevant context"]
-    Context --> Agent["Chief / specialist / MoA advisor"]
+    Context --> Agent["Mesh / specialist / MoA advisor"]
     Agent --> Evidence["Live source verification"]
     Evidence --> Answer["Grounded answer or staged action"]
 ```
@@ -251,7 +251,7 @@ It is a poor default for trivial lookups, deterministic calculations, or urgent 
 This public reference describes the intended and partially implemented system:
 
 - Hermes MoA is a real runtime capability.
-- Chief and five bounded employee roles are operational orchestration concepts used by MeshVault.
+- Mesh and five bounded employee roles are operational orchestration concepts used by MeshVault.
 - MeshVault Vault, Graphify, tool routing, and approval gates are active implementation areas.
 - The paired customer-facing iOS and macOS apps remain pre-release.
 - Model names and providers are deployment choices, not architectural dependencies.
@@ -275,7 +275,7 @@ The trade-off is added latency and model cost. MeshVault therefore reserves MoA 
 This reference is grounded in:
 
 - Hermes MoA runtime behavior
-- MeshVault’s Chief/employee role orchestration design
+- MeshVault’s Mesh/employee role orchestration design
 - the MeshVault owned-stack orchestration and approval model
 
 No credentials, private paths, internal addresses, customer data, or proprietary implementation details are included.
