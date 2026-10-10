@@ -1,27 +1,39 @@
 # MeshVault agentic architecture
 
-A public reference for the mixture-of-agents and role-based orchestration patterns behind MeshVault.
+A written reference for engineers designing multi-agent systems that keep one accountable agent and a human approval step. It describes the mixture-of-agents (MoA) and role-based orchestration patterns behind MeshVault, with Mermaid diagrams.
 
-> **Status:** architecture reference for a pre-release product. The MeshVault iOS secure agent messenger and macOS agentic browser are in design/build. This repository does not claim public availability.
+> **Status:** documentation only. This repository contains this README and a license. There is no code, configuration, or package to install or run. MeshVault's own apps are pre-release and are not part of this repository.
+
+## What is implemented and what is design
+
+| Part | State | Where it lives |
+|---|---|---|
+| MoA loop (advisors plus one acting aggregator) | Implemented and public | [Hermes Agent](https://github.com/NousResearch/hermes-agent), documented in [Mixture of Agents](https://hermes-agent.nousresearch.com/docs/user-guide/features/mixture-of-agents) |
+| Coordinator with specialist roles | Design pattern | MeshVault ran five named specialist roles in 2026 and no longer deploys them. The pattern is kept here as a reference. |
+| Private Markdown vault with graph recall | In use at MeshVault, private | Not published here |
+| Approval levels L0 to L3 and append-only audit trail | Design intent | Not published here |
+| Client apps | Pre-release | Not published here |
+
+Everything outside the MoA loop describes how MeshVault intends the system to behave. Nothing in this repository proves that behavior.
 
 ## Why this exists
 
 A useful agent system needs more than a large model. It needs several kinds of judgment, a single accountable operator, durable context, constrained tools, and explicit gates before real-world side effects.
 
-MeshVault combines two orchestration layers:
+The architecture combines two orchestration layers:
 
 1. **Mixture of Agents (MoA)** gives the acting agent diverse model advice before it decides what to do.
-2. **Role orchestration** lets Mesh delegate bounded work to five employee specialists and return one verified answer to the owner.
+2. **Role orchestration** lets a coordinator delegate bounded work to specialists and return one verified answer to the owner.
 
-The layers complement each other. MoA improves reasoning. Role orchestration improves ownership, scope, and operational accountability.
+MoA adds several model perspectives to one decision. Role orchestration splits work by scope while one coordinator stays accountable for the result.
 
 ## System view
 
 ```mermaid
 flowchart TB
     Owner["Owner"]
-    Channels["Owner interfaces\nmessaging gateway · planned iOS messenger · planned macOS browser"]
-    Mesh["Mesh\nowner-facing coordinator"]
+    Channels["Owner interfaces\nmessaging gateway · pre-release mobile app"]
+    Coord["Coordinator\nowner-facing agent"]
 
     subgraph Reasoning["Reasoning plane"]
         MoA["Hermes MoA"]
@@ -33,7 +45,7 @@ flowchart TB
         MoA --> Agg
     end
 
-    subgraph Specialists["Role plane"]
+    subgraph Specialists["Role plane (design pattern)"]
         Alex["Alex\nsales & outreach"]
         Casey["Casey\noperations & research"]
         Jordan["Jordan\nclient success"]
@@ -43,34 +55,34 @@ flowchart TB
 
     subgraph OwnedStack["Owned data and action plane"]
         Vault["Private knowledge vault\nplain Markdown"]
-        Graphify["Graphify\nknowledge graph + recall"]
+        Graph["Graph index\nrecall"]
         Tools["Tool layer\nfiles · browser · APIs · code"]
         Models["Model router\nlocal + approved cloud"]
         Audit["Append-only audit trail"]
         Gate{"Approval gate"}
     end
 
-    Owner --> Channels --> Mesh
-    Mesh <--> Agg
-    Mesh <--> Alex
-    Mesh <--> Casey
-    Mesh <--> Jordan
-    Mesh <--> Morgan
-    Mesh <--> Riley
+    Owner --> Channels --> Coord
+    Coord <--> Agg
+    Coord <--> Alex
+    Coord <--> Casey
+    Coord <--> Jordan
+    Coord <--> Morgan
+    Coord <--> Riley
 
-    Mesh <--> Vault
-    Vault <--> Graphify
-    Mesh <--> Models
-    Mesh --> Tools --> Gate
+    Coord <--> Vault
+    Vault <--> Graph
+    Coord <--> Models
+    Coord --> Tools --> Gate
     Gate -->|approved| Audit
-    Gate -->|not approved| Mesh
+    Gate -->|not approved| Coord
 ```
 
 ## Hermes MoA loop
 
-Hermes implements MoA as a virtual provider around the normal agent loop. Reference models are advisors: they receive a trimmed, text-only view of the current task state and cannot call tools. Their responses run in parallel, then the acting Hermes aggregator incorporates their private guidance and continues the normal agent and tool loop.
+[Hermes Agent](https://github.com/NousResearch/hermes-agent) implements MoA as a virtual model provider. Each named preset appears as a selectable model under the `moa` provider. Reference models are advisors: they get a trimmed view of the current task state, no tool schemas, and a system prompt that tells them they cannot act. Their calls run in parallel. The acting aggregator then receives their output as private guidance and continues the normal agent and tool loop.
 
-The aggregator is the sole acting model and retains Hermes’s normal tool loop. This separation matters: many models can advise, but only one agent owns the task and its side effects.
+The aggregator is the sole acting model. Many models can advise, but only one agent owns the task and its side effects.
 
 ```mermaid
 sequenceDiagram
@@ -84,17 +96,17 @@ sequenceDiagram
 
     U->>A: Request
     par Parallel advisory fan-out
-        A->>R1: Text-only task state
+        A->>R1: Trimmed task state
         R1-->>A: Analysis and risks
     and
-        A->>R2: Text-only task state
+        A->>R2: Trimmed task state
         R2-->>A: Alternative analysis
     end
     A->>A: Incorporate private advisor guidance
     A->>T: Read, inspect, calculate, or build
     T-->>A: Tool result
 
-    opt Preset cadence is per_iteration
+    opt Cadence is per_iteration or every_n
         par Refresh advisory context
             A->>R1: Current iteration state
             R1-->>A: Updated advice
@@ -115,25 +127,31 @@ sequenceDiagram
     end
 ```
 
+The approval gate at the end of this diagram is MeshVault's design layer. Hermes MoA itself does not stage actions for approval.
+
 ### Runtime properties
 
-- Reference calls are independent and fan out concurrently, with a bounded worker pool.
+These match the Hermes Agent source (`agent/moa_loop.py`, `hermes_cli/moa_config.py`) as of October 2026.
+
+- Reference calls fan out concurrently in a thread pool capped at 8 workers.
 - Advisors cannot use tools and do not act on the user's behalf.
-- The aggregator is the acting model and retains Hermes's normal tool loop.
-- If an advisor call fails, the failure is labeled in the aggregation context, successful advisor responses remain usable, and the turn continues with partial advice.
-- Presets support `user_turn` cadence, which runs advisory fan-out once for each user turn, and `per_iteration` cadence, which runs advisory fan-out on each acting-agent loop iteration.
-- Tool results shown to advisors are head-and-tail previews; the acting agent keeps the full transcript.
-- Recursive MoA presets are rejected.
-- Full MoA traces are opt-in, not automatic.
-- Token usage and estimated cost are accounted for per advisor and aggregator model.
+- The aggregator is the acting model and keeps Hermes's normal tool loop.
+- A failed advisor call becomes a `[failed: ...]` note. Successful responses stay usable, the aggregator is told which references were unavailable (unless `degraded_reference_policy` is `silent`), and the turn continues. If every advisor fails, the aggregator acts alone.
+- The `fanout` setting controls cadence: `user_turn` (the default) runs advisors once per user turn, `per_iteration` runs them on every tool iteration, and `every_n:<N>` runs them on the first iteration and then every Nth.
+- Advisors see tool calls in full and tool results as head-and-tail previews of up to 4,000 characters. The acting agent keeps the full transcript.
+- A preset cannot use another MoA preset as a model. Recursive MoA is blocked.
+- Full MoA traces are opt-in through `moa.save_traces`.
+- Token usage and estimated cost are recorded for each advisor and the aggregator, priced at each model's own rate.
 
 ## Role orchestration
 
-Mesh is the sole owner-facing coordinator. The five employee agents are bounded workers, not independent public personas and not competing orchestrators.
+This section is a design pattern. MeshVault no longer deploys the five named roles below.
+
+The coordinator is the sole owner-facing agent. The specialists are bounded workers, not independent public personas and not competing orchestrators.
 
 ```mermaid
 flowchart LR
-    Request["Owner request"] --> Classify{"Mesh classifies scope"}
+    Request["Owner request"] --> Classify{"Coordinator classifies scope"}
 
     Classify -->|sales or outreach| Alex["Alex"]
     Classify -->|operations, research, finance| Casey["Casey"]
@@ -148,7 +166,7 @@ flowchart LR
     Fanout --> Morgan
     Fanout --> Riley
 
-    Alex --> Verify["Mesh verifies evidence"]
+    Alex --> Verify["Coordinator verifies evidence"]
     Casey --> Verify
     Jordan --> Verify
     Morgan --> Verify
@@ -167,14 +185,14 @@ flowchart LR
 
 | Role | Primary scope | Default boundary |
 |---|---|---|
-| Mesh | Coordination, verification, owner communication | One accountable final answer |
+| Coordinator | Coordination, verification, owner communication | One accountable final answer |
 | Alex | Sales and outreach | Draft or stage outbound work unless approved |
-| Casey | Operations, research, finance | Evidence-first; money movement remains gated |
+| Casey | Operations, research, finance | Evidence first; money movement remains gated |
 | Jordan | Client success | Customer context with outbound actions gated |
 | Morgan | Marketing and content | Draft freely; publishing remains gated |
 | Riley | Engineering | Build and verify; deployments and destructive changes remain gated |
 
-Employee responses are treated as untrusted input until Mesh verifies them against live state or primary sources.
+The coordinator treats specialist responses as untrusted input until it verifies them against live state or primary sources.
 
 ## Context and memory
 
@@ -182,18 +200,20 @@ Employee responses are treated as untrusted input until Mesh verifies them again
 flowchart LR
     Event["Conversation · file · tool result"] --> Capture["Capture durable signal"]
     Capture --> Vault["Private knowledge vault\nplain Markdown"]
-    Vault --> Graph["Graphify index"]
+    Vault --> Graph["Graph index"]
     Query["New owner request"] --> Recall["Graph-first recall"]
     Graph --> Recall
     Recall --> Context["Bounded relevant context"]
-    Context --> Agent["Mesh / specialist / MoA advisor"]
+    Context --> Agent["Coordinator / specialist / MoA advisor"]
     Agent --> Evidence["Live source verification"]
     Evidence --> Answer["Grounded answer or staged action"]
 ```
 
-The vault is the durable source of knowledge. Graphify narrows retrieval before raw documents are opened. Live systems remain the source of truth for current account, service, deployment, and network state.
+The vault is the durable source of knowledge. The graph index narrows retrieval before raw documents are opened. Live systems remain the source of truth for current account, service, deployment, and network state.
 
 ## Approval model
+
+Design intent. No enforcement code for these levels is published here.
 
 | Level | Example | Default behavior |
 |---|---|---|
@@ -202,7 +222,7 @@ The vault is the durable source of knowledge. Graphify narrows retrieval before 
 | L2 | Send, publish, deploy, change an account | Requires explicit current-task approval |
 | L3 | Payment, destructive action, security/credential change | Requires deliberate approval and post-action verification |
 
-The key rule is simple: delegation does not transfer authority. Every worker inherits the same action boundary as the coordinator.
+Delegation does not transfer authority. Every worker inherits the same action boundary as the coordinator.
 
 ## Trust boundaries
 
@@ -246,19 +266,9 @@ MoA is useful when the cost of a shallow answer is higher than the cost of addit
 
 It is a poor default for trivial lookups, deterministic calculations, or urgent low-risk tasks. More agents can add cost and correlated noise without adding insight.
 
-## Current implementation notes
-
-This public reference describes the intended and partially implemented system:
-
-- Hermes MoA is a real runtime capability.
-- Mesh and five bounded employee roles are operational orchestration concepts used by MeshVault.
-- MeshVault Vault, Graphify, tool routing, and approval gates are active implementation areas.
-- The paired customer-facing iOS and macOS apps remain pre-release.
-- Model names and providers are deployment choices, not architectural dependencies.
-
 ## Decision record
 
-The architecture deliberately uses **one acting coordinator with advisory fan-out**, rather than several autonomous writers.
+The architecture uses **one acting coordinator with advisory fan-out** instead of several autonomous writers.
 
 Why:
 
@@ -268,15 +278,12 @@ Why:
 4. Specialist work can be parallelized while final verification remains centralized.
 5. Failure degrades to partial advice instead of conflicting side effects.
 
-The trade-off is added latency and model cost. MeshVault therefore reserves MoA for decisions where diversity of judgment is worth paying for.
+The trade-off is added latency and model cost. The design reserves MoA for decisions where diversity of judgment is worth paying for.
 
-## Source basis
+## Sources
 
-This reference is grounded in:
-
-- Hermes MoA runtime behavior
-- MeshVault’s Mesh/employee role orchestration design
-- the MeshVault owned-stack orchestration and approval model
+- MoA behavior: the [Hermes Agent repository](https://github.com/NousResearch/hermes-agent) and its [Mixture of Agents documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/mixture-of-agents).
+- Role orchestration, memory, and approval model: MeshVault's private design notes, which are not published.
 
 No credentials, private paths, internal addresses, customer data, or proprietary implementation details are included.
 
