@@ -1,0 +1,20 @@
+flowchart LR
+  reader(["Engineer designing agents"]):::actor
+  owner(["Owner (in the design)"]):::actor
+  hermes{{"Hermes Agent (implements MoA)"}}:::ext
+  subgraph SYSTEM["MeshVault agentic architecture"]
+    doc["README.md<br/>Markdown + 5 Mermaid diagrams"]:::doc
+    moa["MoA loop<br/>implemented in Hermes"]:::app
+    roles["Role orchestration<br/>design pattern"]:::doc
+    approval["Approval levels L0 to L3<br/>design intent"]:::doc
+  end
+  reader -->|"reads"| doc
+  doc -->|"describes"| moa
+  doc -->|"describes"| roles
+  doc -->|"describes"| approval
+  moa -.->|"implemented in"| hermes
+  owner -.->|"approves side effects"| approval
+  classDef actor fill:#fde68a,stroke:#b45309,color:#111827
+  classDef app fill:#bfdbfe,stroke:#1d4ed8,color:#0b1220
+  classDef doc fill:#fed7aa,stroke:#c2410c,color:#0b1220
+  classDef ext fill:#e5e7eb,stroke:#4b5563,color:#0b1220,stroke-dasharray:4 3

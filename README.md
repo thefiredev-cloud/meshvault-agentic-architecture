@@ -287,6 +287,35 @@ The trade-off is added latency and model cost. The design reserves MoA for decis
 
 No credentials, private paths, internal addresses, customer data, or proprietary implementation details are included.
 
+<!-- arch:begin -->
+## Architecture
+
+A written reference for multi-agent systems with one accountable agent and a human approval step. Documentation only.
+
+```mermaid
+flowchart LR
+  owner(["Owner"]):::actor
+  coord["Coordinator<br/>one accountable agent"]:::app
+  moa["MoA advisors<br/>advise, never act"]:::app
+  roles["Specialist roles<br/>design pattern"]:::doc
+  gate(["Approval gate<br/>L0 to L3, design"]):::trigger
+  vault[("Vault + graph<br/>private, not published")]:::store
+  owner -->|"request"| coord
+  coord -->|"asks advice"| moa
+  coord -->|"delegates"| roles
+  coord -->|"recall"| vault
+  coord -->|"side effects"| gate
+  gate -.->|"asks yes"| owner
+  classDef actor fill:#fde68a,stroke:#b45309,color:#111827
+  classDef app fill:#bfdbfe,stroke:#1d4ed8,color:#0b1220
+  classDef doc fill:#fed7aa,stroke:#c2410c,color:#0b1220
+  classDef store fill:#bbf7d0,stroke:#15803d,color:#0b1220
+  classDef trigger fill:#ddd6fe,stroke:#6d28d9,color:#0b1220
+```
+
+[Full architecture](docs/ARCHITECTURE.md) · Hi-res: [SVG](docs/architecture/whiteboard.svg) · [PNG 3x](docs/architecture/whiteboard@3x.png) · [dark PNG](docs/architecture/whiteboard.dark@3x.png) · [Explorable (Archify)](docs/architecture/meshvault-agentic-architecture.archify.html) · [Graphify report](docs/architecture/graphify/GRAPH_REPORT.md)
+<!-- arch:end -->
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
