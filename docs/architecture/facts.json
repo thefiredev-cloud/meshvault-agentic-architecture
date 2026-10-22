@@ -1,0 +1,31 @@
+{
+ "repo": "meshvault-agentic-architecture",
+ "files_tracked": 2,
+ "head": "3b95eb8312890027dcd1d5a304de5d891f662ed2",
+ "origin": "https://github.com/thefiredev-cloud/meshvault-agentic-architecture.git",
+ "default_branch": "main",
+ "languages": [
+  [
+   ".md",
+   1
+  ]
+ ],
+ "readme": "README.md",
+ "readme_first_paragraph": "A written reference for engineers designing multi-agent systems that keep one accountable agent and a human approval step. It describes the mixture-of-agents (MoA) and role-based orchestration patterns behind MeshVault, with Mermaid diagrams.",
+ "top_dirs": [],
+ "manifests": [],
+ "libs": [],
+ "entry_points": [],
+ "services": [],
+ "deploy_targets": [],
+ "ci_workflows": [],
+ "cron_and_timers": [],
+ "files_scanned": 0,
+ "external_hosts": [],
+ "env_var_names": [],
+ "ci_secret_names": [],
+ "data_store_signals": {},
+ "auth_signals": {},
+ "tests": [],
+ "docs_files": []
+}

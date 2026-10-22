@@ -1,0 +1,19 @@
+sequenceDiagram
+  autonumber
+  actor owner as Owner
+  participant agg as Acting aggregator
+  participant adv as Reference advisors
+  participant tools as Tools
+  participant gate as Approval gate
+  owner->>agg: request
+  agg->>adv: trimmed task state, in parallel
+  adv-->>agg: analysis and risks, no tool calls
+  agg->>tools: read, inspect, calculate, build
+  tools-->>agg: result
+  alt side effect requested
+    agg->>gate: stage action
+    gate->>owner: ask explicit approval
+    owner->>gate: approve or reject
+  else read-only work
+    agg-->>owner: verified result
+  end

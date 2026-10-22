@@ -1,0 +1,11 @@
+flowchart LR
+  reader(["Engineer designing agents"]):::actor
+  owner(["Owner (in the design)"]):::actor
+  SYSTEM["MeshVault agentic architecture<br/>the system in this repo"]:::app
+  hermes{{"Hermes Agent (implements MoA)"}}:::ext
+  reader -->|"reads"| SYSTEM
+  SYSTEM -.->|"implemented in"| hermes
+  owner -.->|"approves side effects"| SYSTEM
+  classDef actor fill:#fde68a,stroke:#b45309,color:#111827
+  classDef app fill:#bfdbfe,stroke:#1d4ed8,color:#0b1220
+  classDef ext fill:#e5e7eb,stroke:#4b5563,color:#0b1220,stroke-dasharray:4 3
