@@ -1,20 +1,20 @@
-# MeshVault agentic architecture
+# Kodros agentic architecture
 
-A written reference for engineers designing multi-agent systems that keep one accountable agent and a human approval step. It describes the mixture-of-agents (MoA) and role-based orchestration patterns behind MeshVault, with Mermaid diagrams.
+A written reference for engineers designing multi-agent systems that keep one accountable agent and a human approval step. It describes the mixture-of-agents (MoA) and role-based orchestration patterns behind Kodros, with Mermaid diagrams.
 
-> **Status:** documentation only. This repository contains this README and a license. There is no code, configuration, or package to install or run. MeshVault's own apps are pre-release and are not part of this repository.
+> **Status:** documentation only. This repository contains this README and a license. There is no code, configuration, or package to install or run. Kodros's own apps are pre-release and are not part of this repository.
 
 ## What is implemented and what is design
 
 | Part | State | Where it lives |
 |---|---|---|
 | MoA loop (advisors plus one acting aggregator) | Implemented and public | [Hermes Agent](https://github.com/NousResearch/hermes-agent), documented in [Mixture of Agents](https://hermes-agent.nousresearch.com/docs/user-guide/features/mixture-of-agents) |
-| Coordinator with specialist roles | Design pattern | MeshVault ran five named specialist roles in 2026 and no longer deploys them. The pattern is kept here as a reference. |
-| Private Markdown vault with graph recall | In use at MeshVault, private | Not published here |
+| Coordinator with specialist roles | Design pattern | Kodros ran five named specialist roles in 2026 and no longer deploys them. The pattern is kept here as a reference. |
+| Private Markdown vault with graph recall | In use at Kodros, private | Not published here |
 | Approval levels L0 to L3 and append-only audit trail | Design intent | Not published here |
 | Client apps | Pre-release | Not published here |
 
-Everything outside the MoA loop describes how MeshVault intends the system to behave. Nothing in this repository proves that behavior.
+Everything outside the MoA loop describes how Kodros intends the system to behave. Nothing in this repository proves that behavior.
 
 ## Why this exists
 
@@ -127,7 +127,7 @@ sequenceDiagram
     end
 ```
 
-The approval gate at the end of this diagram is MeshVault's design layer. Hermes MoA itself does not stage actions for approval.
+The approval gate at the end of this diagram is Kodros's design layer. Hermes MoA itself does not stage actions for approval.
 
 ### Runtime properties
 
@@ -145,7 +145,7 @@ These match the Hermes Agent source (`agent/moa_loop.py`, `hermes_cli/moa_config
 
 ## Role orchestration
 
-This section is a design pattern. MeshVault no longer deploys the five named roles below.
+This section is a design pattern. Kodros no longer deploys the five named roles below.
 
 The coordinator is the sole owner-facing agent. The specialists are bounded workers, not independent public personas and not competing orchestrators.
 
@@ -231,7 +231,7 @@ flowchart TB
     Public["Public internet"]
     PrivateMesh["Private mesh boundary"]
     Client["Owner devices"]
-    Node["MeshVault node"]
+    Node["Kodros node"]
     Data["Vault + graph + audit"]
     Model["Local models"]
     Cloud["Approved cloud models"]
@@ -283,7 +283,7 @@ The trade-off is added latency and model cost. The design reserves MoA for decis
 ## Sources
 
 - MoA behavior: the [Hermes Agent repository](https://github.com/NousResearch/hermes-agent) and its [Mixture of Agents documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/mixture-of-agents).
-- Role orchestration, memory, and approval model: MeshVault's private design notes, which are not published.
+- Role orchestration, memory, and approval model: Kodros's private design notes, which are not published.
 
 No credentials, private paths, internal addresses, customer data, or proprietary implementation details are included.
 
