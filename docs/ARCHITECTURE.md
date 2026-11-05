@@ -155,7 +155,7 @@ Every path below exists at the pinned commit; links are relative to `docs/`.
 | [`README.md#L81-L144`](../README.md#L81-L144) | Hermes MoA loop, sequence diagram and runtime properties. |
 | [`README.md#L146-L195`](../README.md#L146-L195) | Role orchestration and specialist contract. |
 | [`README.md#L214-L255`](../README.md#L214-L255) | Approval model and trust boundaries. |
-| [`LICENSE`](../LICENSE) | MIT. |
+| [`LICENSE`](../LICENSE) | All rights reserved. |
 
 Graphify (local AST, no LLM) read this repo: 16 nodes, 15 edges, 3 communities. Most connected: `MeshVault agentic architecture` (13), `Hermes MoA loop` (2), `Role orchestration` (2), `What is implemented and what is design` (1), `Why this exists` (1).
 
